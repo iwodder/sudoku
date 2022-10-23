@@ -1,5 +1,3 @@
-from typing import TextIO
-
 from main.BoardFactory import Difficulty
 from main.Sudoku import Sudoku, Guess
 

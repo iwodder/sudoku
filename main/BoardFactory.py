@@ -27,20 +27,8 @@ class BoardFactoryImpl(BoardFactory):
 
     def generate_board(self, difficulty: Difficulty) -> GameBoard:
         board = [[0 for x in range(self.__size)] for x in range(self.__size)]
-
-        vals: list[int] = [x for x in range(1, 10)]
-        shuffle(vals)
-        for num in vals:
-            self.place_number(board, num)
-
-        solution_steps = set([])
-        while len(solution_steps) < difficulty.empty_squares():
-            (x, y) = int(random() * 8), int(random() * 8)
-            val = board[x][y]
-            board[x][y] = 0
-            solution_steps.add((x, y, val))
-
-        return GameBoard(board, solution_steps)
+        self.__fill_board(board)
+        return GameBoard(board, self.__generate_solution(board, difficulty))
 
     def place_number(self, board, num, col: int = 0) -> bool:
         if col >= len(board):
@@ -56,6 +44,21 @@ class BoardFactoryImpl(BoardFactory):
 
         return False
 
+    def __fill_board(self, board):
+        vals: list[int] = [x for x in range(1, 10)]
+        shuffle(vals)
+        for num in vals:
+            self.place_number(board, num)
+
+    def __generate_solution(self, board, difficulty):
+        solution_steps = set([])
+        while len(solution_steps) < difficulty.empty_squares():
+            (x, y) = int(random() * 8), int(random() * 8)
+            val = board[x][y]
+            board[x][y] = 0
+            solution_steps.add((x, y, val))
+        return solution_steps
+
     def is_valid_place(self, board: list[list[int]], row: int, col: int, num: int):
         if row > (len(board) - 1) or col > (len(board[0]) - 1):
             return False
@@ -70,7 +73,7 @@ class BoardFactoryImpl(BoardFactory):
         else:
             return True
 
-    def get_sub_square(self, row: int, col: int) -> (int, int):
+    def __get_sub_square(self, row: int, col: int) -> (int, int):
         if row < 3:
             if col < 3:
                 return 0, 0
@@ -101,7 +104,7 @@ class BoardFactoryImpl(BoardFactory):
         return col_nums
 
     def __get_sub_square_numbers(self, board, row, col) -> set[int]:
-        start_row, start_col = self.get_sub_square(row, col)
+        start_row, start_col = self.__get_sub_square(row, col)
         square_nums = set([])
         for i in range(start_row, start_row + 3):
             for j in range(start_col, start_col + 3):
