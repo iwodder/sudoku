@@ -23,8 +23,7 @@ class CliRunner:
 
     def __start_new_game(self):
         choice = self.__get_user_input(self.__print_difficulty_menu)
-        self.__sudoku.set_difficulty(self.__difficulty_mapping.get(choice))
-        self.__sudoku.start_new_game()
+        self.__sudoku.start_new_game(self.__difficulty_mapping.get(choice))
         while not self.__sudoku.game_over():
             print(self.__sudoku)
             row, col, num = input("Enter the row, column, and value >").split()

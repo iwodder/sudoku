@@ -99,7 +99,7 @@ class BoardFactoryTest(unittest.TestCase):
 
     def test_easy_board_has_15_solution_steps(self):
         game: GameBoard = self.bf.generate_board(Difficulty.EASY)
-        self.assertEquals(15, len(game.get_moves()))
+        self.assertEqual(15, len(game.get_moves()))
 
     def test_using_solution_solves_board(self):
         game: GameBoard = self.bf.generate_board(Difficulty.EASY)

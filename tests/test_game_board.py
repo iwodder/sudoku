@@ -13,7 +13,7 @@ class GameBoardTest(unittest.TestCase):
     def test_boards_equal_based_on_grid(self):
         board: GameBoard = GameBoard([[0]], {(0, 0, 1)})
         board1: GameBoard = GameBoard([[0]], {(0, 0, 1)})
-        self.assertEquals(board, board1)
+        self.assertEqual(board, board1)
 
     def test_boards_not_equal_based_on_grid(self):
         board: GameBoard = GameBoard([[0]], {(0, 0, 1)})

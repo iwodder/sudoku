@@ -8,7 +8,6 @@ from main.GameBoard import GameBoard
 class Sudoku:
     __started: bool = False
     __board_factory: BoardFactory = None
-    __difficulty: Difficulty = None
     __user_board: GameBoard = None
     __num_wrong_guess: int = 0
 
@@ -21,6 +20,9 @@ class Sudoku:
     def guess_number(self, guess: Guess):
         if not self.__user_board.guess(guess.row, guess.col, guess.number):
             self.__num_wrong_guess += 1
+            return False
+        else:
+            return True
 
     def is_winner(self) -> bool:
         self.__started = False
@@ -32,14 +34,11 @@ class Sudoku:
     def get_user_board(self) -> list[list[int]]:
         return self.__user_board.get_board()
 
-    def set_difficulty(self, difficulty: Difficulty):
-        self.__difficulty = difficulty
-
     def __str__(self):
         return BoardFormatter(self.__user_board.get_board()).format()
 
-    def start_new_game(self):
-        self.__user_board = self.__board_factory.generate_board(self.__difficulty)
+    def start_new_game(self, difficulty: Difficulty):
+        self.__user_board = self.__board_factory.generate_board(difficulty)
         self.__started = True
 
 

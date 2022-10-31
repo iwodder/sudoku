@@ -25,20 +25,21 @@ class SudokuTest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.s = Sudoku(StubbedBoardFactory())
-        self.s.set_difficulty(Difficulty.OFF)
-        self.s.start_new_game()
+        self.s.start_new_game(Difficulty.OFF)
 
     def test_can_create_new_game(self):
         game: Sudoku = Sudoku(StubbedBoardFactory())
         self.assertFalse(game.game_started())
 
-        game.start_new_game()
+        game.start_new_game(Difficulty.OFF)
         self.assertTrue(self.s.game_started())
         self.assertFalse(self.s.game_over())
 
-    def test_can_lose(self):
-        self.s.guess_number(Guess(2, 2, 9))
-        self.assertFalse(self.s.is_winner())
+    def test_wrong_number_guess_returns_false(self):
+        self.assertFalse(self.s.guess_number(Guess(2, 2, 9)))
+
+    def test_correct_number_guess_returns_true(self):
+        self.assertTrue(self.s.guess_number(Guess(0, 0, 9)))
 
     def test_three_wrong_guesses_ends_game(self):
         self.s.guess_number(Guess(2, 2, 9))
@@ -100,5 +101,5 @@ class SudokuTest(unittest.TestCase):
 | 4 | 3 | 2 || 5 | 7 | 1 || 6 | 8 | 9 |
 =======================================
 """
-        self.assertEquals(board, str(self.s))
+        self.assertEqual(board, str(self.s))
 
