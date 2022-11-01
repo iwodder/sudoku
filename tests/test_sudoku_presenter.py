@@ -112,7 +112,6 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
 
         pres.select(0, 0)
 
-        self.assertEqual(16, len(self.__highlights))
         self.__row_was_highlighted(0, 0)
         self.__col_was_highlighted(0, 0)
 
@@ -122,9 +121,23 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
         pres.select(1, 2)
         pres.select(0, 0)
 
-        self.assertEqual(16, len(self.__unhighlights))
         self.__row_was_unhighlighted(2, 1)
         self.__col_was_unhighlighted(1, 2)
+
+    def test_choosing_cell_highlights_square_of_selected_cell(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+
+        pres.select(1, 2)
+
+        self.__square_was_modified(1, 2, self.__highlights)
+
+    def test_choosing_cell_unhighlights_previous_square_of_selected_cell(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+
+        pres.select(1, 2)
+        pres.select(0, 0)
+
+        self.__square_was_modified(1, 2, self.__unhighlights)
 
     def __row_was_highlighted(self, col_exclude: int, row: int):
         for col in range(9):
@@ -136,6 +149,15 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
             if row != row_exclude and (row, col) not in self.__highlights:
                 self.fail(f"Expected to find (row={row}, col={col})")
 
+    def __square_was_modified(self, row: int, col: int, moves):
+        starting_row = self.__get_starting(row)
+        starting_col = self.__get_starting(col)
+        for x in range(starting_row, starting_row + 3):
+            for y in range(starting_col, starting_col + 3):
+                if x != row and y != col:
+                    if (x, y) not in moves:
+                        self.fail(f"Expected to find (row={x}, col={y}), but only had {moves})")
+
     def __row_was_unhighlighted(self, col_exclude: int, row: int):
         for col in range(9):
             if col != col_exclude and (row, col) not in self.__unhighlights:
@@ -146,3 +168,10 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
             if row != row_exclude and (row, col) not in self.__unhighlights:
                 self.fail(f"Expected to find (row={row}, col={col})")
 
+    def __get_starting(self, num: int) -> int:
+        if 0 <= num <= 2:
+            return 0
+        elif num <= 5:
+            return 3
+        else:
+            return 6

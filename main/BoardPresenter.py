@@ -42,11 +42,13 @@ class SudokuPresenter:
         self.__view.deactivate(self.__current_row, self.__current_col)
         self.__unhighlight_row()
         self.__unhighlight_col()
+        self.__unhighlight_square()
         self.__current_row = row
         self.__current_col = col
         self.__view.activate(self.__current_row, self.__current_col)
         self.__highlight_row()
         self.__highlight_col()
+        self.__highlight_square()
 
     def __highlight_row(self):
         for col in range(9):
@@ -69,3 +71,26 @@ class SudokuPresenter:
             for row in range(9):
                 if row != self.__current_row:
                     self.__view.unhighlight(row, self.__current_col)
+
+    def __highlight_square(self):
+        starting_col = self.__get_starting(self.__current_col)
+        starting_row = self.__get_starting(self.__current_row)
+        for x in range(starting_row, starting_row + 3):
+            for y in range(starting_col, starting_col + 3):
+                self.__view.highlight(x, y)
+
+    def __unhighlight_square(self):
+        if self.__current_col > -1 and self.__current_row > -1:
+            starting_col = self.__get_starting(self.__current_col)
+            starting_row = self.__get_starting(self.__current_row)
+            for x in range(starting_row, starting_row + 3):
+                for y in range(starting_col, starting_col + 3):
+                    self.__view.unhighlight(x, y)
+
+    def __get_starting(self, num: int) -> int:
+        if 0 <= num <= 2:
+            return 0
+        elif num <= 5:
+            return 3
+        else:
+            return 6
