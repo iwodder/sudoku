@@ -1,6 +1,6 @@
 from main.BoardFactory import BoardFactoryImpl
 from main.CliRunner import CliRunner
-from main.GuiRunner import GameBoard
+from main.gui.GuiRunner import GameBoard
 from main.Sudoku import Sudoku
 from tkinter import *
 from sys import argv
