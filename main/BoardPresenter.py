@@ -77,7 +77,8 @@ class SudokuPresenter:
         starting_row = self.__get_starting(self.__current_row)
         for x in range(starting_row, starting_row + 3):
             for y in range(starting_col, starting_col + 3):
-                self.__view.highlight(x, y)
+                if self.__current_row != x and self.__current_col != y:
+                    self.__view.highlight(x, y)
 
     def __unhighlight_square(self):
         if self.__current_col > -1 and self.__current_row > -1:

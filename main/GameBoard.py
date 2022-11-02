@@ -17,7 +17,7 @@ class GameBoard:
         if self.__is_inside_board(col, row):
             return self.__process_move(col, num, row)
         else:
-            raise IllegalMoveError("Move must be inside the board, 0 < row < 8 and 0 < col < 8")
+            raise IllegalMoveError("Move must be inside the board, 0 <= row <= 8 and 0 <= col <= 8")
 
     def __process_move(self, col, num, row):
         if (row, col, num) in self.__solution_steps:

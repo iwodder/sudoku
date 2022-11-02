@@ -9,27 +9,39 @@ class Sudoku:
     __started: bool = False
     __board_factory: BoardFactory = None
     __user_board: GameBoard = None
-    __num_wrong_guess: int = 0
+    __wrong_guesses: [Guess]
+    __right_guesses: [Guess]
 
     def __init__(self, board_factory: BoardFactory):
         self.__board_factory = board_factory
+        self.__right_guesses = []
+        self.__wrong_guesses = []
 
     def game_started(self) -> bool:
         return self.__started
 
     def guess_number(self, guess: Guess):
-        if not self.__user_board.guess(guess.row, guess.col, guess.number):
-            self.__num_wrong_guess += 1
+        if guess in self.__right_guesses:
+            return True
+        elif guess in self.__wrong_guesses:
             return False
         else:
+            return self.__process_new_guess(guess)
+
+    def __process_new_guess(self, guess):
+        if self.__user_board.guess(guess.row, guess.col, guess.number):
+            self.__right_guesses.append(guess)
             return True
+        else:
+            self.__wrong_guesses.append(guess)
+            return False
 
     def is_winner(self) -> bool:
         self.__started = False
-        return self.__user_board.is_solved() and self.__num_wrong_guess < 3
+        return self.__user_board.is_solved() and len(self.__wrong_guesses) < 3
 
     def game_over(self):
-        return self.__num_wrong_guess == 3 or self.__user_board.is_solved()
+        return len(self.__wrong_guesses) == 3 or self.__user_board.is_solved()
 
     def get_user_board(self) -> list[list[int]]:
         return self.__user_board.get_board()

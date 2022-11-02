@@ -40,15 +40,20 @@ class SudokuTest(unittest.TestCase):
 
     def test_correct_number_guess_returns_true(self):
         self.assertTrue(self.s.guess_number(Guess(0, 0, 9)))
+        self.assertTrue(self.s.guess_number(Guess(0, 0, 9)))
 
-    def test_three_wrong_guesses_ends_game(self):
+    def test_repeatedly_guessing_wrong_number_doesnt_end_game(self):
         self.s.guess_number(Guess(2, 2, 9))
+        self.s.guess_number(Guess(2, 2, 9))
+        self.s.guess_number(Guess(2, 2, 9))
+
         self.assertFalse(self.s.game_over())
 
+    def test_three_different_wrong_guesses_ends_game(self):
         self.s.guess_number(Guess(2, 2, 9))
-        self.assertFalse(self.s.game_over())
+        self.s.guess_number(Guess(2, 2, 7))
+        self.s.guess_number(Guess(2, 2, 8))
 
-        self.s.guess_number(Guess(2, 2, 9))
         self.assertTrue(self.s.game_over())
 
     def test_move_outside_game_board_causes_error(self):
