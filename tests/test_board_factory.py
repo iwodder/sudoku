@@ -110,6 +110,12 @@ class BoardFactoryTest(unittest.TestCase):
         self.assertTrue(game.is_solved())
         self.assertTrue(self.is_valid(game.get_board()))
 
+    def test_all_solution_nums_should_be_between_1_and_9(self):
+        game: GameBoard = self.bf.generate_board(Difficulty.EASY)
+        steps = game.get_moves()
+        for (x, y, num) in steps:
+            self.assertTrue(1 <= num <= 9, f"Solution step generated with invalid number {num}")
+
     def is_valid(self, board):
         if self.__contains_invalid_row(board):
             return False

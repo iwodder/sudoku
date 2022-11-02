@@ -55,8 +55,11 @@ class BoardFactoryImpl(BoardFactory):
         while len(solution_steps) < difficulty.empty_squares():
             (x, y) = int(random() * 8), int(random() * 8)
             val = board[x][y]
-            board[x][y] = 0
             solution_steps.add((x, y, val))
+
+        for (x, y, _) in solution_steps:
+            board[x][y] = 0
+
         return solution_steps
 
     def is_valid_place(self, board: list[list[int]], row: int, col: int, num: int):
