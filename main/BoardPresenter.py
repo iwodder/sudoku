@@ -10,6 +10,7 @@ class SudokuPresenter:
     __green_color = '#00cc00'
     __current_row = -1
     __current_col = -1
+    __current_num = -1
 
     def __init__(self, view: SudokuViewInterface, sudoku_game: Sudoku):
         self.__view = view
@@ -38,55 +39,55 @@ class SudokuPresenter:
         if self.__game.is_winner():
             self.__view.show_acknowledge_dialog(self.__winner_title, self.__winner_msg)
 
-    def select(self, row: int, col: int):
-        self.__view.deactivate(self.__current_row, self.__current_col)
-        self.__unhighlight_row()
-        self.__unhighlight_col()
-        self.__unhighlight_square()
+    def select(self, row: int, col: int, num: int = 0):
+        self.__unhighlight_selection()
         self.__current_row = row
         self.__current_col = col
+        if num != 0:
+            self.__current_num = num
+        self.__highlight_new_selection()
+
+    def __unhighlight_selection(self):
+        self.__view.deactivate(self.__current_row, self.__current_col)
+        self.__modify_row(self.__view.unhighlight)
+        self.__modify_col(self.__view.unhighlight)
+        self.__modify_square(self.__view.unhighlight)
+        self.__modify_number(self.__view.unhighlight)
+
+    def __highlight_new_selection(self):
         self.__view.activate(self.__current_row, self.__current_col)
-        self.__highlight_row()
-        self.__highlight_col()
-        self.__highlight_square()
+        self.__modify_row(self.__view.highlight)
+        self.__modify_col(self.__view.highlight)
+        self.__modify_square(self.__view.highlight)
+        self.__modify_number(self.__view.highlight)
 
-    def __highlight_row(self):
-        for col in range(9):
-            if col != self.__current_col:
-                self.__view.highlight(self.__current_row, col)
+    def __modify_number(self, action):
+        if self.__current_num > -1:
+            locations = self.__game.get_all_locations_of(self.__current_num)
+            for (row, col) in locations:
+                if row != self.__current_row and col != self.__current_col:
+                    action(row, col)
 
-    def __highlight_col(self):
-        for row in range(9):
-            if row != self.__current_row:
-                self.__view.highlight(row, self.__current_col)
-
-    def __unhighlight_row(self):
+    def __modify_row(self, action):
         if self.__current_row != -1:
             for col in range(9):
                 if col != self.__current_col:
-                    self.__view.unhighlight(self.__current_row, col)
+                    action(self.__current_row, col)
 
-    def __unhighlight_col(self):
+    def __modify_col(self, action):
         if self.__current_col != -1:
             for row in range(9):
                 if row != self.__current_row:
-                    self.__view.unhighlight(row, self.__current_col)
+                    action(row, self.__current_col)
 
-    def __highlight_square(self):
-        starting_col = self.__get_starting(self.__current_col)
-        starting_row = self.__get_starting(self.__current_row)
-        for x in range(starting_row, starting_row + 3):
-            for y in range(starting_col, starting_col + 3):
-                if self.__current_row != x and self.__current_col != y:
-                    self.__view.highlight(x, y)
-
-    def __unhighlight_square(self):
+    def __modify_square(self, action):
         if self.__current_col > -1 and self.__current_row > -1:
             starting_col = self.__get_starting(self.__current_col)
             starting_row = self.__get_starting(self.__current_row)
             for x in range(starting_row, starting_row + 3):
                 for y in range(starting_col, starting_col + 3):
-                    self.__view.unhighlight(x, y)
+                    if x != self.__current_row and y != self.__current_col:
+                        action(x, y)
 
     def __get_starting(self, num: int) -> int:
         if 0 <= num <= 2:

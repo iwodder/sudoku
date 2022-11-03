@@ -100,6 +100,7 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
 
     def test_choosing_cell_sets_active_cell_and_deactivates_old(self):
         pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
 
         pres.select(0, 0)
         pres.select(0, 2)
@@ -109,6 +110,7 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
 
     def test_choosing_cell_highlights_row_and_col_except_selected_cell(self):
         pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
 
         pres.select(0, 0)
 
@@ -117,6 +119,7 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
 
     def test_choosing_cell_unhighlights_previous_row_and_col_except_selected_cell(self):
         pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
 
         pres.select(1, 2)
         pres.select(0, 0)
@@ -126,6 +129,7 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
 
     def test_choosing_cell_highlights_square_of_selected_cell(self):
         pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
 
         pres.select(1, 2)
 
@@ -133,11 +137,45 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
 
     def test_choosing_cell_unhighlights_previous_square_of_selected_cell(self):
         pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
 
         pres.select(1, 2)
         pres.select(0, 0)
 
         self.__square_was_modified(1, 2, self.__unhighlights)
+
+    def test_highlights_all_numbers_if_selected_cell_has_number(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
+
+        pres.select(1, 2, 6)
+
+        expected_values = {(0, 1), (1, 4), (2, 7), (3, 2), (4, 5), (5, 8), (6, 0), (7, 3), (8, 6)}
+        for (row, col) in expected_values:
+            self.assertTrue((row, col) in self.__highlights)
+
+        self.assertFalse((1, 2) in self.__highlights)
+
+    def test_unhighlights_last_number_when_new_number_selected_cell(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
+
+        pres.select(1, 2, 6)
+        pres.select(1, 2, 9)
+
+        expected_values = {(0, 1), (1, 4), (2, 7), (3, 2), (4, 5), (5, 8), (6, 0), (7, 3), (8, 6)}
+        for (row, col) in expected_values:
+            self.assertTrue((row, col) in self.__unhighlights)
+
+    def test_shouldnt_highlight_number_when_zero(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
+
+        pres.select(3, 3, 0)
+
+        unexpected_values = {(0, 0), (7, 7)}
+        for (row, col) in unexpected_values:
+            self.assertFalse((row, col) in self.__highlights)
 
     def __row_was_highlighted(self, col_exclude: int, row: int):
         for col in range(9):

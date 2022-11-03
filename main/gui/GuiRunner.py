@@ -59,7 +59,7 @@ class GameBoard(SudokuViewInterface):
 
     def __setup_game_board(self):
         self.__root.title("Sudoku")
-        mainframe = ttk.Frame(self.__root, padding="3 3 3 3")
+        mainframe = ttk.Frame(self.__root)
         mainframe.grid(column=0, row=0, sticky=(N, W, S, E))
         self.__root.columnconfigure(0, weight=1)
         self.__root.rowconfigure(0, weight=1)

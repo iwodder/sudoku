@@ -36,6 +36,14 @@ class GameBoard:
     def get_moves(self):
         return deepcopy(self.__solution_steps)
 
+    def get_all_locations_of(self, num: int):
+        locations = []
+        for row in range(len(self.__game_board)):
+            for col in range(len(self.__game_board[row])):
+                if self.__game_board[row][col] == num:
+                    locations.append((row, col))
+
+        return locations
     def is_solved(self):
         return len(self.__solution_steps) == 0
 

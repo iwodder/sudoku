@@ -37,7 +37,11 @@ class Cell:
             self.__presenter.guess_number(self.__row, self.__column, char)
 
     def __click_handler(self, event: Event):
-        self.__presenter.select(self.__row, self.__column)
+        num = 0
+        if self.__label.cget("text").isdecimal():
+            num = int(self.__label.cget("text"))
+
+        self.__presenter.select(self.__row, self.__column, num)
 
     def select(self):
         self.__frame['style'] = 'Selected.TLabel'

@@ -46,6 +46,9 @@ class Sudoku:
     def get_user_board(self) -> list[list[int]]:
         return self.__user_board.get_board()
 
+    def get_all_locations_of(self, num: int):
+        return self.__user_board.get_all_locations_of(num)
+
     def __str__(self):
         return BoardFormatter(self.__user_board.get_board()).format()
 
