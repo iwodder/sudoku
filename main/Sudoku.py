@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from main.BoardFactory import BoardFactory, Difficulty
-from main.GameBoard import GameBoard
+from main.GameBoard import GameBoard, Position
 
 
 class Sudoku:
@@ -46,8 +46,8 @@ class Sudoku:
     def get_user_board(self) -> list[list[int]]:
         return self.__user_board.get_board()
 
-    def get_all_locations_of(self, num: int):
-        return self.__user_board.get_all_locations_of(num)
+    def get_selection(self, row: int, col: int, num: int) -> list[Position]:
+        return self.__user_board.get_selection(row, col, num)
 
     def __str__(self):
         return BoardFormatter(self.__user_board.get_board()).format()

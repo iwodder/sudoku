@@ -1,4 +1,5 @@
 from main.BoardFactory import Difficulty
+from main.GameBoard import Position
 from main.gui.SudokuViewInterface import SudokuViewInterface
 from main.Sudoku import Sudoku, Guess
 
@@ -15,6 +16,7 @@ class SudokuPresenter:
     def __init__(self, view: SudokuViewInterface, sudoku_game: Sudoku):
         self.__view = view
         self.__game = sudoku_game
+        self.__current_selection: [Position] = []
 
     def start_new_game(self, difficulty: Difficulty):
         self.__game.start_new_game(difficulty)
@@ -41,58 +43,20 @@ class SudokuPresenter:
 
     def select(self, row: int, col: int, num: int = 0):
         self.__unhighlight_selection()
-        self.__current_row = row
-        self.__current_col = col
-        if num != 0:
-            self.__current_num = num
-        self.__highlight_new_selection()
+        self.__highlight_new_selection(row, col, num)
 
     def __unhighlight_selection(self):
         self.__view.deactivate(self.__current_row, self.__current_col)
-        self.__modify_row(self.__view.unhighlight)
-        self.__modify_col(self.__view.unhighlight)
-        self.__modify_square(self.__view.unhighlight)
-        self.__modify_number(self.__view.unhighlight)
+        for pos in self.__current_selection:
+            self.__view.unhighlight(pos.row, pos.col)
 
-    def __highlight_new_selection(self):
-        self.__view.activate(self.__current_row, self.__current_col)
-        self.__modify_row(self.__view.highlight)
-        self.__modify_col(self.__view.highlight)
-        self.__modify_square(self.__view.highlight)
-        self.__modify_number(self.__view.highlight)
+    def __highlight_new_selection(self, row: int, col: int, num: int):
+        self.__view.activate(row, col)
+        selection = self.__game.get_selection(row, col, num)
+        for pos in selection:
+            self.__view.highlight(pos.row, pos.col)
 
-    def __modify_number(self, action):
-        if self.__current_num > -1:
-            locations = self.__game.get_all_locations_of(self.__current_num)
-            for (row, col) in locations:
-                if row != self.__current_row and col != self.__current_col:
-                    action(row, col)
+        self.__current_selection = selection
+        self.__current_row = row
+        self.__current_col = col
 
-    def __modify_row(self, action):
-        if self.__current_row != -1:
-            for col in range(9):
-                if col != self.__current_col:
-                    action(self.__current_row, col)
-
-    def __modify_col(self, action):
-        if self.__current_col != -1:
-            for row in range(9):
-                if row != self.__current_row:
-                    action(row, self.__current_col)
-
-    def __modify_square(self, action):
-        if self.__current_col > -1 and self.__current_row > -1:
-            starting_col = self.__get_starting(self.__current_col)
-            starting_row = self.__get_starting(self.__current_row)
-            for x in range(starting_row, starting_row + 3):
-                for y in range(starting_col, starting_col + 3):
-                    if x != self.__current_row and y != self.__current_col:
-                        action(x, y)
-
-    def __get_starting(self, num: int) -> int:
-        if 0 <= num <= 2:
-            return 0
-        elif num <= 5:
-            return 3
-        else:
-            return 6
