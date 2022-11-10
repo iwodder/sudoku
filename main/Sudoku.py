@@ -56,6 +56,10 @@ class Sudoku:
         self.__user_board = self.__board_factory.generate_board(difficulty)
         self.__started = True
 
+    def get_values(self):
+        return self.__user_board.get_values()
+
+
 
 @dataclass(frozen=True)
 class Guess:

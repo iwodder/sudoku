@@ -41,27 +41,40 @@ class GameBoard:
 
     def get_selection(self, row: int, col: int, num: int) -> list[Position]:
         result = []
+        self.__get_row_and_col(col, row, result)
+        self.__get_square(col, row, result)
+        self.__get_all_locations_of(num, result)
+        return result
+
+    def get_values(self) -> list[Value]:
+        result = []
+        for row in range(9):
+            for col in range(9):
+                value = str(self.__game_board[row][col])
+                if value == '0':
+                    value = ' '
+                result.append(Value(row, col, value))
+        return result
+
+    def is_solved(self):
+        return len(self.__solution_steps) == 0
+
+    def __get_row_and_col(self, col: int, row: int, result: list[Position]):
         for x in range(9):
             if x != col:
                 result.append(Position(row, x))
             if x != row:
                 result.append(Position(x, col))
 
-        starting_col = self.__get_starting(col)
-        starting_row = self.__get_starting(row)
+    def __get_square(self, col: int, row: int, result: list[Position]):
+        starting_col = self.__get_start_value(col)
+        starting_row = self.__get_start_value(row)
         for x in range(starting_row, starting_row + 3):
             for y in range(starting_col, starting_col + 3):
                 if x != row and y != col:
                     result.append(Position(x, y))
 
-        self.__get_all_locations_of(num, result)
-
-        return result
-
-    def is_solved(self):
-        return len(self.__solution_steps) == 0
-
-    def __get_all_locations_of(self, num: int, locations: [Position]):
+    def __get_all_locations_of(self, num: int, locations: list[Position]):
         if num != 0:
             for row in range(len(self.__game_board)):
                 for col in range(len(self.__game_board[row])):
@@ -70,7 +83,7 @@ class GameBoard:
 
         return locations
 
-    def __get_starting(self, num: int) -> int:
+    def __get_start_value(self, num: int) -> int:
         if 0 <= num <= 2:
             return 0
         elif num <= 5:
@@ -89,3 +102,10 @@ class GameBoard:
 class Position:
     row: int = -1
     col: int = -1
+
+
+@dataclass(frozen=True)
+class Value:
+    row: int = 0
+    col: int = 0
+    value: str = ''

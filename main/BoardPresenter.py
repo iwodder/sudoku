@@ -22,12 +22,8 @@ class SudokuPresenter:
         self.__game.start_new_game(difficulty)
         self.__view.disable_start_button()
 
-        for row in range(len(self.__game.get_user_board())):
-            for col in range(len(self.__game.get_user_board()[row])):
-                num = self.__game.get_user_board()[row][col]
-                if num == 0:
-                    num = ' '
-                self.__view.set_grid_value(row, col, str(num))
+        for val in self.__game.get_values():
+            self.__view.set_grid_value(val.row, val.col, val.value)
 
     def guess_number(self, row: int, column: int, number: str):
         g = Guess(row, column, int(number))

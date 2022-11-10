@@ -1,6 +1,6 @@
 import unittest
 
-from main.GameBoard import GameBoard, IllegalMoveError
+from main.GameBoard import GameBoard, IllegalMoveError, Position, Value
 from main.Sudoku import Sudoku, Guess
 from main.BoardFactory import BoardFactory, Difficulty
 
@@ -108,3 +108,11 @@ class SudokuTest(unittest.TestCase):
 """
         self.assertEqual(board, str(self.s))
 
+    def test_get_values(self):
+        itr = self.s.get_values()
+        self.assertEqual(81, len(itr))
+
+    def test_get_values_contains_spaces_for_empty(self):
+        itr = self.s.get_values()
+
+        self.assertTrue(Value(0, 0, ' ') in itr)
