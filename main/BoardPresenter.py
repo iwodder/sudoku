@@ -7,6 +7,8 @@ from main.Sudoku import Sudoku, Guess
 class SudokuPresenter:
     __winner_msg = "You're a winner, congratulations!"
     __winner_title = "Winner :)"
+    __loser_msg = "You lose."
+    __loser_title = "Loser :("
     __red_color = '#ff0000'
     __green_color = '#00cc00'
     __current_row = -1
@@ -29,13 +31,16 @@ class SudokuPresenter:
         g = Guess(row, column, int(number))
         self.__view.deactivate(self.__current_row, self.__current_col)
 
-        if not self.__game.guess_number(g):
-            self.__view.set_cell_font_color(row, column, self.__red_color)
-        else:
+        if self.__game.guess_number(g):
             self.__view.set_cell_font_color(row, column, self.__green_color)
+        else:
+            self.__view.set_cell_font_color(row, column, self.__red_color)
 
-        if self.__game.is_winner():
-            self.__view.show_acknowledge_dialog(self.__winner_title, self.__winner_msg)
+        if self.__game.game_over():
+            if self.__game.is_winner():
+                self.__view.show_acknowledge_dialog(self.__winner_title, self.__winner_msg)
+            else:
+                self.__view.show_acknowledge_dialog(self.__loser_title, self.__loser_msg)
 
     def select(self, row: int, col: int, num: int = 0):
         self.__unhighlight_selection()

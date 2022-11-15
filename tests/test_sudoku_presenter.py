@@ -177,6 +177,17 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
         for (row, col) in unexpected_values:
             self.assertFalse((row, col) in self.__highlights)
 
+    def test_three_different_incorrect_guesses_prints_loser_dialog(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
+
+        pres.guess_number(0, 0, "8")
+        pres.guess_number(7, 7, "8")
+        pres.guess_number(1, 1, "8")
+
+        self.assertEqual(self.__msg, "You lose.")
+        self.assertEqual(self.__title, "Loser :(")
+
     def __row_was_highlighted(self, col_exclude: int, row: int):
         for col in range(9):
             if col != col_exclude and (row, col) not in self.__highlights:
