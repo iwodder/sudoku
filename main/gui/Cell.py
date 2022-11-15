@@ -18,15 +18,14 @@ class Cell:
         self.__add_label()
 
     def __add_label(self):
-        self.__label = ttk.Label(self.__frame, text=" ")
-        self.__label.grid(row=self.__row, column=self.__column)
+        self.__label = ttk.Label(self.__frame, text="", width=5, anchor='center', justify="center", font="Times 16")
+        self.__label.grid(row=self.__row, column=self.__column, pady=10)
         self.__label.bind("<Button-1>", self.__click_handler)
         self.__label.bind("<Key>", self.__key_press_handler)
 
     def __add_frame(self, parent):
-        self.__frame = ttk.Frame(parent, padding=10)
+        self.__frame = ttk.Frame(parent, borderwidth=1, relief='solid', padding=1)
         self.__frame.grid(row=self.__row, column=self.__column, rowspan=1, columnspan=1)
-        self.__frame.config(borderwidth=1, relief='sunken')
         self.__frame.bind("<Button-1>", self.__click_handler)
         self.__frame.bind("<Key>", self.__key_press_handler)
 

@@ -60,11 +60,11 @@ class GameBoard(SudokuViewInterface):
     def __setup_game_board(self):
         self.__root.title("Sudoku")
         mainframe = ttk.Frame(self.__root)
-        mainframe.grid(column=0, row=0, sticky=(N, W, S, E))
-        self.__root.columnconfigure(0, weight=1)
-        self.__root.rowconfigure(0, weight=1)
-        self.__add_cells(mainframe)
+        mainframe.grid(column=0, row=0, pady=5, padx=5)
+        cell_frame = ttk.Frame(mainframe)
+        cell_frame.grid(column=0, row=0, columnspan=1, rowspan=1, padx=5, pady=5)
         self.__add_start_buttons(mainframe)
+        self.__add_cells(cell_frame)
 
     def __add_cells(self, mainframe: Frame):
         for row in range(9):
@@ -72,18 +72,23 @@ class GameBoard(SudokuViewInterface):
                 self.__cells[row][col] = Cell(row, col, mainframe, self.__presenter)
 
     def __add_start_buttons(self, frame: Frame):
-        self.__easy = ttk.Button(frame, text="Easy", command=lambda: self.__presenter.start_new_game(Difficulty.EASY))
-        self.__easy.grid(row=10, column=0, rowspan=1, columnspan=3, sticky=E)
-        self.__med = ttk.Button(frame, text="Medium",
+        button_frame = ttk.Frame(frame)
+        button_frame.grid(row=2, column=0, columnspan=3, rowspan=2)
+        self.__easy = ttk.Button(button_frame, text="Easy", style='Difficulty.TButton',
+                                 command=lambda: self.__presenter.start_new_game(Difficulty.EASY))
+        self.__easy.grid(row=1, column=0, rowspan=2, columnspan=6, sticky=E)
+        self.__med = ttk.Button(button_frame, text="Medium", style='Difficulty.TButton',
                                 command=lambda: self.__presenter.start_new_game(Difficulty.MEDIUM))
-        self.__med.grid(row=10, column=3, rowspan=1, columnspan=3, sticky=(E, W))
-        self.__hard = ttk.Button(frame, text="Hard", command=lambda: self.__presenter.start_new_game(Difficulty.HARD))
-        self.__hard.grid(row=10, column=6, rowspan=1, columnspan=3, sticky=W)
+        self.__med.grid(row=1, column=6, rowspan=2, columnspan=6, sticky=(E, W))
+        self.__hard = ttk.Button(button_frame, text="Hard", style='Difficulty.TButton',
+                                 command=lambda: self.__presenter.start_new_game(Difficulty.HARD))
+        self.__hard.grid(row=1, column=12, rowspan=2, columnspan=6, sticky=W)
 
     def __set_game_styles(self):
         style = ttk.Style()
         style.configure('Selected.TLabel', background='#ccffff')
         style.configure('Highlight.TLabel', background='#848788')
+        style.configure('Difficulty.TButton', font="Times 16")
 
     def run(self):
         self.__root.mainloop()
