@@ -1,7 +1,7 @@
 from main.BoardFactory import Difficulty
 from main.GameBoard import Position
 from main.gui.SudokuViewInterface import SudokuViewInterface
-from main.Sudoku import Sudoku, Guess
+from main.Sudoku import Sudoku, Guess, IllegalStateException
 
 
 class SudokuPresenter:
@@ -21,11 +21,16 @@ class SudokuPresenter:
         self.__current_selection: [Position] = []
 
     def start_new_game(self, difficulty: Difficulty):
-        self.__game.start_new_game(difficulty)
-        self.__view.disable_start_button()
+        try:
+            self.__game.start_new_game(difficulty)
+            self.__view.disable_start_button()
+            self.__view.enable_end_game_button()
 
-        for val in self.__game.get_values():
-            self.__view.set_grid_value(val.row, val.col, val.value)
+            for val in self.__game.get_values():
+                self.__view.set_grid_value(val.row, val.col, val.value)
+
+        except IllegalStateException:
+            self.__view.show_acknowledge_dialog("Info", "Please end current game to start a new one.")
 
     def guess_number(self, row: int, column: int, number: str):
         g = Guess(row, column, int(number))
@@ -45,6 +50,11 @@ class SudokuPresenter:
     def select(self, row: int, col: int, num: int = 0):
         self.__unhighlight_selection()
         self.__highlight_new_selection(row, col, num)
+
+    def end_game(self):
+        self.__game.end_game()
+        self.__view.disable_end_game_button()
+        self.__view.enable_start_button()
 
     def __unhighlight_selection(self):
         self.__view.deactivate(self.__current_row, self.__current_col)

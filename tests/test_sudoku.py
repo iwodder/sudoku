@@ -1,7 +1,7 @@
 import unittest
 
 from main.GameBoard import GameBoard, IllegalMoveError, Position, Value
-from main.Sudoku import Sudoku, Guess
+from main.Sudoku import Sudoku, Guess, IllegalStateException
 from main.BoardFactory import BoardFactory, Difficulty
 
 
@@ -65,6 +65,7 @@ class SudokuTest(unittest.TestCase):
 
     def test_user_board_can_be_returned(self):
         board: list[list[int]] = self.s.get_user_board()
+
         self.assertEqual(9, len(board))
         self.assertEqual(9, len(board[0]))
         self.assertEqual(int, type(board[0][0]))
@@ -81,13 +82,15 @@ class SudokuTest(unittest.TestCase):
     def test_can_win_game(self):
         self.s.guess_number(Guess(0, 0, 9))
         self.s.guess_number(Guess(7, 7, 1))
-        self.assertTrue(self.s.is_winner())
-        self.assertTrue(self.s.game_over())
 
-    def test_after_a_win_game_game_isnt_started(self):
+        self.assertTrue(self.s.game_over())
+        self.assertTrue(self.s.is_winner())
+
+    def test_after_game_is_over_game_isnt_started(self):
         self.s.guess_number(Guess(0, 0, 9))
         self.s.guess_number(Guess(7, 7, 1))
-        self.assertTrue(self.s.is_winner())
+
+        self.assertTrue(self.s.game_over())
         self.assertFalse(self.s.game_started())
 
     def test_can_print_board(self):
@@ -116,3 +119,14 @@ class SudokuTest(unittest.TestCase):
         itr = self.s.get_values()
 
         self.assertTrue(Value(0, 0, ' ') in itr)
+
+    def test_cannot_start_new_game_if_one_is_started(self):
+        with self.assertRaises(IllegalStateException) as ex:
+            self.s.start_new_game(Difficulty.OFF)
+
+        self.assertEqual("Game already in progress.", ex.exception.message)
+
+    def test_can_end_a_game(self):
+        self.s.end_game()
+
+        self.assertFalse(self.s.game_started())

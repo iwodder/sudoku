@@ -23,6 +23,7 @@ class GameBoard(SudokuViewInterface):
 
     def __init__(self, root: Tk):
         self.__root = root
+        self.__root.option_add('*tearOff', FALSE)
         self.__presenter = SudokuPresenter(self, Sudoku(BoardFactoryImpl()))
         self.__set_game_styles()
         self.__setup_game_board()
@@ -57,14 +58,33 @@ class GameBoard(SudokuViewInterface):
         if 0 <= row <= 8 and 0 <= col <= 8:
             self.__cells[row][col].unhighlight()
 
+    def enable_end_game_button(self) -> None:
+        self.__file_menu.entryconfigure("End Game", state=ACTIVE)
+
+    def enable_start_button(self) -> None:
+        self.__easy['state'] = 'active'
+        self.__med['state'] = 'active'
+        self.__hard['state'] = 'active'
+
+    def disable_end_game_button(self) -> None:
+        self.__file_menu.entryconfigure("End Game", state=DISABLED)
+
     def __setup_game_board(self):
         self.__root.title("Sudoku")
         mainframe = ttk.Frame(self.__root)
         mainframe.grid(column=0, row=0, pady=5, padx=5)
+
+        menu_bar = Menu(self.__root)
+        self.__file_menu = Menu(menu_bar)
+        menu_bar.add_cascade(menu=self.__file_menu, label="File")
+        self.__file_menu.add_command(label="End Game", command=self.__presenter.end_game)
+        self.__root.configure(menu=menu_bar)
+
         cell_frame = ttk.Frame(mainframe)
         cell_frame.grid(column=0, row=0, columnspan=1, rowspan=1, padx=5, pady=5)
         self.__add_start_buttons(mainframe)
         self.__add_cells(cell_frame)
+        self.disable_end_game_button()
 
     def __add_cells(self, mainframe: Frame):
         for row in range(9):

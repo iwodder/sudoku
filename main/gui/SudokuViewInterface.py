@@ -12,6 +12,18 @@ class SudokuViewInterface(ABC):
         pass
 
     @abstractmethod
+    def enable_end_game_button(self) -> None:
+        pass
+
+    @abstractmethod
+    def enable_start_button(self) -> None:
+        pass
+
+    @abstractmethod
+    def disable_end_game_button(self) -> None:
+        pass
+
+    @abstractmethod
     def set_cell_font_color(self, row: int, col: int, color: str):
         pass
 

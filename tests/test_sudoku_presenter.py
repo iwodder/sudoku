@@ -16,7 +16,11 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
     __last_deactivated = False
     __highlights = None
     __unhighlights = None
+    __end_game_enabled = False
     moves: [(int, int, str)] = []
+
+    def __init__(self, methodName: str = ...):
+        super().__init__(methodName)
 
     def set_grid_value(self, row: int, col: int, num: str):
         self.moves.append((row, col, num))
@@ -43,6 +47,15 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
     def unhighlight(self, row: int, col: int):
         self.__unhighlights.add((row, col))
 
+    def enable_end_game_button(self) -> None:
+        self.__end_game_enabled = True
+
+    def enable_start_button(self) -> None:
+        self.__start_disabled = False
+
+    def disable_end_game_button(self) -> None:
+        self.__end_game_enabled = False
+
     def setUp(self) -> None:
         self.moves = []
         self.__start_disabled = False
@@ -63,6 +76,20 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
         pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
         pres.start_new_game(Difficulty.EASY)
         self.assertEqual(81, len(self.moves))
+
+    def test_starting_new_game_twice_displays_dialog_to_end_game(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.EASY)
+        pres.start_new_game(Difficulty.EASY)
+
+        self.assertEqual(self.__msg, "Please end current game to start a new one.")
+        self.assertEqual(self.__title, "Info")
+
+    def test_starting_new_game_enables_end_game_button(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.EASY)
+
+        self.assertTrue(self.__end_game_enabled)
 
     def test_guess_number_incorrect_changes_cell_to_red(self):
         pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
@@ -187,6 +214,14 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
 
         self.assertEqual(self.__msg, "You lose.")
         self.assertEqual(self.__title, "Loser :(")
+
+    def test_ending_game_enables_start_buttons_and_disables_end_game(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
+        pres.end_game()
+
+        self.assertFalse(self.__end_game_enabled)
+        self.assertFalse(self.__start_disabled)
 
     def __row_was_highlighted(self, col_exclude: int, row: int):
         for col in range(9):

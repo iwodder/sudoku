@@ -37,11 +37,14 @@ class Sudoku:
             return False
 
     def is_winner(self) -> bool:
-        self.__started = False
         return self.__user_board.is_solved() and len(self.__wrong_guesses) < 3
 
     def game_over(self):
-        return len(self.__wrong_guesses) == 3 or self.__user_board.is_solved()
+        if len(self.__wrong_guesses) == 3 or self.__user_board.is_solved():
+            self.__started = False
+            return True
+        else:
+            return False
 
     def get_user_board(self) -> list[list[int]]:
         return self.__user_board.get_board()
@@ -53,12 +56,17 @@ class Sudoku:
         return BoardFormatter(self.__user_board.get_board()).format()
 
     def start_new_game(self, difficulty: Difficulty):
-        self.__user_board = self.__board_factory.generate_board(difficulty)
-        self.__started = True
+        if self.__started:
+            raise IllegalStateException("Game already in progress.")
+        else:
+            self.__user_board = self.__board_factory.generate_board(difficulty)
+            self.__started = True
 
     def get_values(self):
         return self.__user_board.get_values()
 
+    def end_game(self):
+        self.__started = False
 
 
 @dataclass(frozen=True)
@@ -97,3 +105,9 @@ class BoardFormatter:
             return ' '
         else:
             return str(x)
+
+
+class IllegalStateException(Exception):
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(message)
