@@ -223,6 +223,15 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
         self.assertFalse(self.__end_game_enabled)
         self.assertFalse(self.__start_disabled)
 
+    def test_ending_game_clears_board(self):
+        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
+        pres.start_new_game(Difficulty.OFF)
+        self.moves.clear()
+        pres.end_game()
+
+        self.assertEqual(81, len(self.moves))
+        self.assertEqual(0, len(list(filter(lambda move: move[2] != " ", self.moves))))
+
     def __row_was_highlighted(self, col_exclude: int, row: int):
         for col in range(9):
             if col != col_exclude and (row, col) not in self.__highlights:

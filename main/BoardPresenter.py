@@ -53,6 +53,10 @@ class SudokuPresenter:
 
     def end_game(self):
         self.__game.end_game()
+        for x in range(9):
+            for y in range(9):
+                self.__view.set_grid_value(x, y, " ")
+
         self.__view.disable_end_game_button()
         self.__view.enable_start_button()
 

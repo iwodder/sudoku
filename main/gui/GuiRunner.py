@@ -23,8 +23,11 @@ class GameBoard(SudokuViewInterface):
 
     def __init__(self, root: Tk):
         self.__root = root
-        self.__root.option_add('*tearOff', FALSE)
         self.__presenter = SudokuPresenter(self, Sudoku(BoardFactoryImpl()))
+        self.__root.title("Sudoku")
+        self.__root.option_add('*tearOff', FALSE)
+        self.__menu_bar = MenuBar(self.__root, self.__presenter)
+        self.__root.configure(menu=self.__menu_bar)
         self.__set_game_styles()
         self.__setup_game_board()
 
@@ -59,27 +62,19 @@ class GameBoard(SudokuViewInterface):
             self.__cells[row][col].unhighlight()
 
     def enable_end_game_button(self) -> None:
-        self.__file_menu.entryconfigure("End Game", state=ACTIVE)
-
-    def enable_start_button(self) -> None:
-        self.__easy['state'] = 'active'
-        self.__med['state'] = 'active'
-        self.__hard['state'] = 'active'
+        self.__menu_bar.enable_end_game_option()
 
     def disable_end_game_button(self) -> None:
-        self.__file_menu.entryconfigure("End Game", state=DISABLED)
+        self.__menu_bar.disable_end_game_option()
+
+    def enable_start_button(self) -> None:
+        self.__easy['state'] = 'normal'
+        self.__med['state'] = 'normal'
+        self.__hard['state'] = 'normal'
 
     def __setup_game_board(self):
-        self.__root.title("Sudoku")
         mainframe = ttk.Frame(self.__root)
         mainframe.grid(column=0, row=0, pady=5, padx=5)
-
-        menu_bar = Menu(self.__root)
-        self.__file_menu = Menu(menu_bar)
-        menu_bar.add_cascade(menu=self.__file_menu, label="File")
-        self.__file_menu.add_command(label="End Game", command=self.__presenter.end_game)
-        self.__root.configure(menu=menu_bar)
-
         cell_frame = ttk.Frame(mainframe)
         cell_frame.grid(column=0, row=0, columnspan=1, rowspan=1, padx=5, pady=5)
         self.__add_start_buttons(mainframe)
@@ -112,3 +107,20 @@ class GameBoard(SudokuViewInterface):
 
     def run(self):
         self.__root.mainloop()
+
+
+class MenuBar(Menu):
+
+    def __init__(self, win: Tk, presenter: SudokuPresenter):
+        super().__init__(win)
+        self.__file_menu = Menu(self)
+        self.__file_menu.add_command(label="End Game", command=presenter.end_game)
+        self.__file_menu.add_separator()
+        self.__file_menu.add_command(label="Exit", command=win.quit)
+        self.add_cascade(menu=self.__file_menu, label="File")
+
+    def enable_end_game_option(self):
+        self.__file_menu.entryconfigure("End Game", state=NORMAL)
+
+    def disable_end_game_option(self):
+        self.__file_menu.entryconfigure("End Game", state=DISABLED)
