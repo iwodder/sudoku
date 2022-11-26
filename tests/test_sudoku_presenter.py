@@ -6,240 +6,187 @@ from main.Sudoku import Sudoku
 from tests.test_sudoku import StubbedBoardFactory
 
 
-class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
-    __start_disabled: bool = False
-    __prompted: bool = False
-    __color: str = ""
-    __msg: str = ""
-    __title: str = ""
-    __active_cell = None
-    __last_deactivated = False
-    __highlights = None
-    __unhighlights = None
-    __end_game_enabled = False
-    moves: [(int, int, str)] = []
+class SpySudokuInterface(SudokuViewInterface):
 
-    def __init__(self, methodName: str = ...):
-        super().__init__(methodName)
+    def __init__(self):
+        self.start_disabled: bool = False
+        self.prompted: bool = False
+        self.color: str = ""
+        self.msg: str = ""
+        self.title: str = ""
+        self.active_cell = None
+        self.last_deactivated = False
+        self.highlights = set([])
+        self.unhighlights = set([])
+        self.end_game_enabled = False
+        self.moves: [(int, int, str)] = []
 
     def set_grid_value(self, row: int, col: int, num: str):
         self.moves.append((row, col, num))
 
     def disable_start_button(self) -> None:
-        self.__start_disabled = not self.__start_disabled
+        self.start_disabled = not self.start_disabled
 
     def show_acknowledge_dialog(self, title: str, msg: str):
-        self.__msg = msg
-        self.__title = title
+        self.msg = msg
+        self.title = title
 
     def activate(self, row: int, col: int):
-        self.__active_cell = (row, col)
+        self.active_cell = (row, col)
 
     def set_cell_font_color(self, row: int, col: int, color: str):
-        self.__color = color
+        self.color = color
 
     def deactivate(self, row: int, col: int):
-        self.__last_deactivated = (row, col)
+        self.last_deactivated = (row, col)
 
     def highlight(self, row: int, col: int):
-        self.__highlights.add((row, col))
+        self.highlights.add((row, col))
 
     def unhighlight(self, row: int, col: int):
-        self.__unhighlights.add((row, col))
+        self.unhighlights.add((row, col))
 
     def enable_end_game_button(self) -> None:
-        self.__end_game_enabled = True
+        self.end_game_enabled = True
 
     def enable_start_button(self) -> None:
-        self.__start_disabled = False
+        self.start_disabled = False
 
     def disable_end_game_button(self) -> None:
-        self.__end_game_enabled = False
+        self.end_game_enabled = False
+
+
+class TestSudokuPresenter(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.moves = []
-        self.__start_disabled = False
-        self.__highlights = set([])
-        self.__unhighlights = set([])
+        self.view_spy = SpySudokuInterface()
+        self.presenter = SudokuPresenter(self.view_spy, Sudoku(StubbedBoardFactory()))
+        self.presenter.start_new_game(Difficulty.EASY)
 
     def test_start_new_game_disables_start_menu(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.EASY)
-        self.assertTrue(self.__start_disabled)
+        self.assertTrue(self.view_spy.start_disabled)
 
     def test_start_new_game_sets_cell_values(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.EASY)
-        self.assertTrue(len(self.moves) > 0)
+        self.assertTrue(len(self.view_spy.moves) > 0)
 
     def test_start_new_game_sets_all_cell_values(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.EASY)
-        self.assertEqual(81, len(self.moves))
+        self.assertEqual(81, len(self.view_spy.moves))
 
     def test_starting_new_game_twice_displays_dialog_to_end_game(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.EASY)
-        pres.start_new_game(Difficulty.EASY)
+        self.presenter.start_new_game(Difficulty.EASY)
 
-        self.assertEqual(self.__msg, "Please end current game to start a new one.")
-        self.assertEqual(self.__title, "Info")
+        self.assertEqual(self.view_spy.msg, "Please end current game to start a new one.")
+        self.assertEqual(self.view_spy.title, "Info")
 
     def test_starting_new_game_enables_end_game_button(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.EASY)
-
-        self.assertTrue(self.__end_game_enabled)
+        self.assertTrue(self.view_spy.end_game_enabled)
 
     def test_guess_number_incorrect_changes_cell_to_red(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
+        self.presenter.guess_number(0, 1, "9")
 
-        pres.guess_number(0, 1, "9")
-
-        self.assertEqual("#ff0000", self.__color)
+        self.assertEqual("#ff0000", self.view_spy.color)
 
     def test_guess_number_correct_changes_cell_to_green(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
+        self.presenter.guess_number(0, 0, "9")
 
-        pres.guess_number(0, 0, "9")
-
-        self.assertEqual("#00cc00", self.__color)
+        self.assertEqual("#00cc00", self.view_spy.color)
 
     def test_correct_guess_for_last_number_prints_winner_dialog(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
+        self.presenter.guess_number(0, 0, "9")
+        self.presenter.guess_number(7, 7, "1")
 
-        pres.guess_number(0, 0, "9")
-        pres.guess_number(7, 7, "1")
-
-        self.assertEqual(self.__msg, "You're a winner, congratulations!")
-        self.assertEqual(self.__title, "Winner :)")
+        self.assertEqual(self.view_spy.msg, "You're a winner, congratulations!")
+        self.assertEqual(self.view_spy.title, "Winner :)")
 
     def test_guessing_number_deactivates_cell(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
+        self.presenter.guess_number(0, 0, "9")
 
-        pres.guess_number(0, 0, "9")
-
-        self.assertTrue(self.__last_deactivated)
+        self.assertTrue(self.view_spy.last_deactivated)
 
     def test_choosing_cell_sets_active_cell_and_deactivates_old(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
+        self.presenter.select(0, 0)
+        self.presenter.select(0, 2)
 
-        pres.select(0, 0)
-        pres.select(0, 2)
-
-        self.assertEqual((0, 2), self.__active_cell)
-        self.assertEqual((0, 0), self.__last_deactivated)
+        self.assertEqual((0, 2), self.view_spy.active_cell)
+        self.assertEqual((0, 0), self.view_spy.last_deactivated)
 
     def test_choosing_cell_highlights_row_and_col_except_selected_cell(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
-
-        pres.select(0, 0)
+        self.presenter.select(0, 0)
 
         self.__row_was_highlighted(0, 0)
         self.__col_was_highlighted(0, 0)
 
     def test_choosing_cell_unhighlights_previous_row_and_col_except_selected_cell(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
-
-        pres.select(1, 2)
-        pres.select(0, 0)
+        self.presenter.select(1, 2)
+        self.presenter.select(0, 0)
 
         self.__row_was_unhighlighted(2, 1)
         self.__col_was_unhighlighted(1, 2)
 
     def test_choosing_cell_highlights_square_of_selected_cell(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
+        self.presenter.select(1, 2)
 
-        pres.select(1, 2)
-
-        self.__square_was_modified(1, 2, self.__highlights)
+        self.__square_was_modified(1, 2, self.view_spy.highlights)
 
     def test_choosing_cell_unhighlights_previous_square_of_selected_cell(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
+        self.presenter.select(1, 2)
+        self.presenter.select(0, 0)
 
-        pres.select(1, 2)
-        pres.select(0, 0)
-
-        self.__square_was_modified(1, 2, self.__unhighlights)
+        self.__square_was_modified(1, 2, self.view_spy.unhighlights)
 
     def test_highlights_all_numbers_if_selected_cell_has_number(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
-
-        pres.select(1, 2, 6)
+        self.presenter.select(1, 2, 6)
 
         expected_values = {(0, 1), (1, 4), (2, 7), (3, 2), (4, 5), (5, 8), (6, 0), (7, 3), (8, 6)}
         for (row, col) in expected_values:
-            self.assertTrue((row, col) in self.__highlights)
+            self.assertTrue((row, col) in self.view_spy.highlights)
 
-        self.assertFalse((1, 2) in self.__highlights)
+        self.assertFalse((1, 2) in self.view_spy.highlights)
 
     def test_unhighlights_last_number_when_new_number_selected_cell(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
-
-        pres.select(1, 2, 6)
-        pres.select(1, 2, 9)
+        self.presenter.select(1, 2, 6)
+        self.presenter.select(1, 2, 9)
 
         expected_values = {(0, 1), (1, 4), (2, 7), (3, 2), (4, 5), (5, 8), (6, 0), (7, 3), (8, 6)}
         for (row, col) in expected_values:
-            self.assertTrue((row, col) in self.__unhighlights)
+            self.assertTrue((row, col) in self.view_spy.unhighlights)
 
     def test_shouldnt_highlight_number_when_zero(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
-
-        pres.select(3, 3, 0)
+        self.presenter.select(3, 3, 0)
 
         unexpected_values = {(0, 0), (7, 7)}
         for (row, col) in unexpected_values:
-            self.assertFalse((row, col) in self.__highlights)
+            self.assertFalse((row, col) in self.view_spy.highlights)
 
     def test_three_different_incorrect_guesses_prints_loser_dialog(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
+        self.presenter.guess_number(0, 0, "8")
+        self.presenter.guess_number(7, 7, "8")
+        self.presenter.guess_number(1, 1, "8")
 
-        pres.guess_number(0, 0, "8")
-        pres.guess_number(7, 7, "8")
-        pres.guess_number(1, 1, "8")
-
-        self.assertEqual(self.__msg, "You lose.")
-        self.assertEqual(self.__title, "Loser :(")
+        self.assertEqual(self.view_spy.msg, "You lose.")
+        self.assertEqual(self.view_spy.title, "Loser :(")
 
     def test_ending_game_enables_start_buttons_and_disables_end_game(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
-        pres.end_game()
+        self.presenter.end_game()
 
-        self.assertFalse(self.__end_game_enabled)
-        self.assertFalse(self.__start_disabled)
+        self.assertFalse(self.view_spy.end_game_enabled)
+        self.assertFalse(self.view_spy.start_disabled)
 
     def test_ending_game_clears_board(self):
-        pres = SudokuPresenter(self, Sudoku(StubbedBoardFactory()))
-        pres.start_new_game(Difficulty.OFF)
-        self.moves.clear()
-        pres.end_game()
+        self.view_spy.moves.clear()
+        self.presenter.end_game()
 
-        self.assertEqual(81, len(self.moves))
-        self.assertEqual(0, len(list(filter(lambda move: move[2] != " ", self.moves))))
+        self.assertEqual(81, len(self.view_spy.moves))
+        self.assertEqual(0, len(list(filter(lambda move: move[2] != " ", self.view_spy.moves))))
 
     def __row_was_highlighted(self, col_exclude: int, row: int):
         for col in range(9):
-            if col != col_exclude and (row, col) not in self.__highlights:
+            if col != col_exclude and (row, col) not in self.view_spy.highlights:
                 self.fail(f"Expected to find (row={row}, col={col})")
 
     def __col_was_highlighted(self, row_exclude: int, col: int):
         for row in range(9):
-            if row != row_exclude and (row, col) not in self.__highlights:
+            if row != row_exclude and (row, col) not in self.view_spy.highlights:
                 self.fail(f"Expected to find (row={row}, col={col})")
 
     def __square_was_modified(self, row: int, col: int, moves):
@@ -253,12 +200,12 @@ class TestSudokuPresenter(unittest.TestCase, SudokuViewInterface):
 
     def __row_was_unhighlighted(self, col_exclude: int, row: int):
         for col in range(9):
-            if col != col_exclude and (row, col) not in self.__unhighlights:
+            if col != col_exclude and (row, col) not in self.view_spy.unhighlights:
                 self.fail(f"Expected to find (row={row}, col={col})")
 
     def __col_was_unhighlighted(self, row_exclude: int, col: int):
         for row in range(9):
-            if row != row_exclude and (row, col) not in self.__unhighlights:
+            if row != row_exclude and (row, col) not in self.view_spy.unhighlights:
                 self.fail(f"Expected to find (row={row}, col={col})")
 
     def __get_starting(self, num: int) -> int:
