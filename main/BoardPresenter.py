@@ -46,6 +46,7 @@ class SudokuPresenter:
                 self.__view.show_acknowledge_dialog(self.__winner_title, self.__winner_msg)
             else:
                 self.__view.show_acknowledge_dialog(self.__loser_title, self.__loser_msg)
+            self.end_game()
 
     def select(self, row: int, col: int, num: int = 0):
         self.__unhighlight_selection()

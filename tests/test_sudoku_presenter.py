@@ -91,12 +91,14 @@ class TestSudokuPresenter(unittest.TestCase):
 
         self.assertEqual("#00cc00", self.view_spy.color)
 
-    def test_correct_guess_for_last_number_prints_winner_dialog(self):
+    def test_correct_guess_for_last_number_prints_winner_dialog_and_ends_game(self):
         self.presenter.guess_number(0, 0, "9")
         self.presenter.guess_number(7, 7, "1")
 
         self.assertEqual(self.view_spy.msg, "You're a winner, congratulations!")
         self.assertEqual(self.view_spy.title, "Winner :)")
+        self.assertFalse(self.view_spy.end_game_enabled)
+        self.assertFalse(self.view_spy.start_disabled)
 
     def test_guessing_number_deactivates_cell(self):
         self.presenter.guess_number(0, 0, "9")
@@ -165,6 +167,8 @@ class TestSudokuPresenter(unittest.TestCase):
 
         self.assertEqual(self.view_spy.msg, "You lose.")
         self.assertEqual(self.view_spy.title, "Loser :(")
+        self.assertFalse(self.view_spy.end_game_enabled)
+        self.assertFalse(self.view_spy.start_disabled)
 
     def test_ending_game_enables_start_buttons_and_disables_end_game(self):
         self.presenter.end_game()
